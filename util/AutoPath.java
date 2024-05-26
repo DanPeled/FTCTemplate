@@ -98,8 +98,7 @@ public class AutoPath {
     public void flipY() {
         for (int i = 0; i < path.size(); i++) {
             Marker marker = path.get(i);
-            if (marker instanceof Waypoint) {
-                Waypoint newW = (Waypoint) marker;
+            if (marker instanceof Waypoint newW) {
                 if (newW.type == Waypoint.Type.StaticWaypoint) continue;
                 newW.locationDelta.flipY();
                 path.set(i, newW);

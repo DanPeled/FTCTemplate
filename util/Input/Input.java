@@ -21,10 +21,10 @@ import java.util.concurrent.Executors;
  */
 public class Input {
     private static Gamepad gamepad1, gamepad2;
-    private static Map<KeyCode, Toggle> toggles;
+    private static final Map<KeyCode, Toggle> toggles;
     private static LinearOpMode opMode;
     private static List<Toggle> existingTogglesInOpMode;
-    private static Executor executor;
+    private static final Executor executor;
     private static Thread inputUpdaterThread;
     private static InputUpdater inputUpdater;
 
@@ -128,26 +128,6 @@ public class Input {
         }
     }
 
-    private static class UpdateControlsTask implements Runnable {
-        OpMode opMode;
-
-        public UpdateControlsTask(OpMode opMode) {
-            this.opMode = opMode;
-        }
-
-        @Override
-        public void run() {
-            for (Toggle t : existingTogglesInOpMode) {
-                if (t.getMapping() != null) {
-                    t.update();
-                }
-            }
-//            for (Toggle t : toggles.values()) {
-//                t.update();
-//            }
-        }
-    }
-
     /**
      * Get the list of Toggle instances.
      *
@@ -209,25 +189,30 @@ public class Input {
         return Math.abs(axis.getValue());
     }
 
+    private static class UpdateControlsTask implements Runnable {
+        OpMode opMode;
+
+        public UpdateControlsTask(OpMode opMode) {
+            this.opMode = opMode;
+        }
+
+        @Override
+        public void run() {
+            for (Toggle t : existingTogglesInOpMode) {
+                if (t.getMapping() != null) {
+                    t.update();
+                }
+            }
+//            for (Toggle t : toggles.values()) {
+//                t.update();
+//            }
+        }
+    }
+
     /**
      * This class represents a keycode for gamepad button checks.
      */
     public static class KeyCode {
-        private final Supplier<Boolean> returnFunc;
-
-        private KeyCode(Supplier<Boolean> returnFunc) {
-            this.returnFunc = returnFunc;
-        }
-
-        /**
-         * Check if the keycode is pressed.
-         *
-         * @return True if the keycode is pressed, false otherwise.
-         */
-        public boolean getValue() {
-            return returnFunc.get();
-        }
-
         //region Button constants for Gamepad1
         public static final KeyCode Gamepad1A = new KeyCode(() -> gamepad1.a);
         public static final KeyCode Gamepad1B = new KeyCode(() -> gamepad1.b);
@@ -261,6 +246,19 @@ public class Input {
         public static final KeyCode Gamepad2LeftStickButton = new KeyCode(() -> gamepad2.left_stick_button);
         public static final KeyCode Gamepad2RightStickButton = new KeyCode(() -> gamepad2.right_stick_button);
         public static final KeyCode Gamepad2PS = new KeyCode(() -> gamepad2.ps);
+        private final Supplier<Boolean> returnFunc;
+        private KeyCode(Supplier<Boolean> returnFunc) {
+            this.returnFunc = returnFunc;
+        }
+
+        /**
+         * Check if the keycode is pressed.
+         *
+         * @return True if the keycode is pressed, false otherwise.
+         */
+        public boolean getValue() {
+            return returnFunc.get();
+        }
 
         //endregion
     }
@@ -269,8 +267,21 @@ public class Input {
      * This class represents an axis for gamepad input.
      */
     public static class Axis {
+        // Axis constants for Gamepad1
+        public static final Axis Gamepad1RightStickX = new Axis(() -> (double) gamepad1.right_stick_x);
+        public static final Axis Gamepad1RightStickY = new Axis(() -> (double) gamepad1.right_stick_y);
+        public static final Axis Gamepad1LeftStickY = new Axis(() -> (double) gamepad1.left_stick_y);
+        public static final Axis Gamepad1LeftStickX = new Axis(() -> (double) gamepad1.left_stick_x);
+        public static final Axis Gamepad1RightTrigger = new Axis(() -> (double) gamepad1.right_trigger);
+        public static final Axis Gamepad1LeftTrigger = new Axis(() -> (double) gamepad1.left_trigger);
+        // Axis constants for Gamepad2
+        public static final Axis Gamepad2RightStickX = new Axis(() -> (double) gamepad2.right_stick_x);
+        public static final Axis Gamepad2RightStickY = new Axis(() -> (double) gamepad2.right_stick_y);
+        public static final Axis Gamepad2LeftStickY = new Axis(() -> (double) gamepad2.left_stick_y);
+        public static final Axis Gamepad2LeftStickX = new Axis(() -> (double) gamepad2.left_stick_x);
+        public static final Axis Gamepad2RightTrigger = new Axis(() -> (double) gamepad2.right_trigger);
+        public static final Axis Gamepad2LeftTrigger = new Axis(() -> (double) gamepad2.left_trigger);
         private final Func<Double> returnFunc;
-
         private Axis(Func<Double> returnFunc) {
             this.returnFunc = returnFunc;
         }
@@ -283,22 +294,6 @@ public class Input {
         public double getValue() {
             return returnFunc.value();
         }
-
-        // Axis constants for Gamepad1
-        public static final Axis Gamepad1RightStickX = new Axis(() -> (double) gamepad1.right_stick_x);
-        public static final Axis Gamepad1RightStickY = new Axis(() -> (double) gamepad1.right_stick_y);
-        public static final Axis Gamepad1LeftStickY = new Axis(() -> (double) gamepad1.left_stick_y);
-        public static final Axis Gamepad1LeftStickX = new Axis(() -> (double) gamepad1.left_stick_x);
-        public static final Axis Gamepad1RightTrigger = new Axis(() -> (double) gamepad1.right_trigger);
-        public static final Axis Gamepad1LeftTrigger = new Axis(() -> (double) gamepad1.left_trigger);
-
-        // Axis constants for Gamepad2
-        public static final Axis Gamepad2RightStickX = new Axis(() -> (double) gamepad2.right_stick_x);
-        public static final Axis Gamepad2RightStickY = new Axis(() -> (double) gamepad2.right_stick_y);
-        public static final Axis Gamepad2LeftStickY = new Axis(() -> (double) gamepad2.left_stick_y);
-        public static final Axis Gamepad2LeftStickX = new Axis(() -> (double) gamepad2.left_stick_x);
-        public static final Axis Gamepad2RightTrigger = new Axis(() -> (double) gamepad2.right_trigger);
-        public static final Axis Gamepad2LeftTrigger = new Axis(() -> (double) gamepad2.left_trigger);
     }
 
     private static class InputUpdater implements Runnable {
